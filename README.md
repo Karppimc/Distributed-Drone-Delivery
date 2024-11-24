@@ -9,7 +9,7 @@ Before running the application, ensure you have the following installed:
 1. **Java Development Kit (JDK)**: Version 17 or above.
 2. **Maven**: For building and running the Spring Boot application.
 3. **RabbitMQ**: Installed and running locally. Ensure the RabbitMQ Management Plugin is enabled.
-4. **cURL**: For sending test commands to RabbitMQ.
+4. **CURL**: For sending test commands to RabbitMQ.
 
 ## Setup Instructions
 
