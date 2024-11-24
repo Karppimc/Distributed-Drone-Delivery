@@ -1,93 +1,106 @@
-# Distributed Drone Delivery
+# Distributed Drone Delivery System
 
+This project implements a distributed drone delivery system using RabbitMQ for message communication. The application simulates a drone that responds to commands such as `start-drone`, `land`, and `return-to-base`.
 
+## Prerequisites
 
-## Getting started
+Before running the application, ensure you have the following installed:
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+1. **Java Development Kit (JDK)**: Version 17 or above.
+2. **Maven**: For building and running the Spring Boot application.
+3. **RabbitMQ**: Installed and running locally. Ensure the RabbitMQ Management Plugin is enabled.
+4. **cURL**: For sending test commands to RabbitMQ.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+## Setup Instructions
 
-## Add your files
+### 1. Clone the Repository
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
-
+```bash
+git clone https://github.com/your-username/Distributed-Drone-Delivery.git
+cd Distributed-Drone-Delivery
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/santeri-karppinen-sw-architectures-design-2024/Distributed-Drone-Delivery.git
-git branch -M main
-git push -uf origin main
+
+### 2. Install RabbitMQ
+
+- Download and install RabbitMQ from [https://www.rabbitmq.com/download.html](https://www.rabbitmq.com/download.html).
+- Start RabbitMQ:
+  ```bash
+  rabbitmq-server
+  ```
+- Verify RabbitMQ is running:
+  ```bash
+  rabbitmqctl status
+  ```
+
+### 3. Configure RabbitMQ
+
+Ensure the `flight-commands` queue exists:
+
+1. Access the RabbitMQ Management Interface:
+   - Open a browser and navigate to `http://localhost:15672`.
+   - Log in with the default credentials: `guest` / `guest`.
+2. Create a queue:
+   - Go to the **Queues** tab.
+   - Click **Add a new queue** and enter `flight-commands` as the name.
+   - Leave other fields as default and click **Add queue**.
+
+### 4. Build and Run the Application
+ - USE OWN TERMINAL FOR INVENTORY DELIVERY AND DEVICE
+1. Navigate to the project directory:
+   ```bash
+   cd Device or cd Delivery or cd Intentory
+   ```
+2. Build and run the application:
+   ```bash
+   mvn spring-boot:run
+   ```
+
+The application will start and listen for messages from the `flight-commands` queue.
+
+### 5. Test the Application
+
+You can send commands to the `flight-commands` queue using the RabbitMQ HTTP API and `cURL`:
+
+#### Send a Command
+
+```bash
+curl -i -u guest:guest -H "content-type:application/json" -X POST \
+-d '{"properties":{}, "routing_key":"flight-commands", "payload":"{\"command\":\"start-drone\"}", "payload_encoding":"string"}' \
+http://localhost:15672/api/exchanges/%2F/amq.default/publish
 ```
 
-## Integrate with your tools
+Replace `start-drone` with `land` or `return-to-base` to test other commands.
 
-- [ ] [Set up project integrations](https://gitlab.com/santeri-karppinen-sw-architectures-design-2024/Distributed-Drone-Delivery/-/settings/integrations)
+#### Expected Output
 
-## Collaborate with your team
+In the application logs, you should see:
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+```plaintext
+Received command: {"command":"start-drone"}
+```
 
-## Test and Deploy
+For the `land` and `return-to-base` commands, the output will reflect the respective commands.
 
-Use the built-in continuous integration in GitLab.
+## Viewing Results
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+The application logs the received commands in the console where the Spring Boot application is running.
 
-***
+## Troubleshooting
 
-# Editing this README
+### Common Issues
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+1. **RabbitMQ Queue Not Found**:
+   - Ensure the `flight-commands` queue is created in RabbitMQ.
 
-## Suggestions for a good README
+2. **Connection Issues**:
+   - Ensure RabbitMQ is running and accessible at `localhost:5672`.
+   - Verify RabbitMQ credentials (`guest:guest`) are correct.
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+3. **Command Not Received**:
+   - Check if the queue has the correct name (`flight-commands`).
+   - Confirm the application is running and listening.
 
-## Name
-Choose a self-explaining name for your project.
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+## Contact
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+For any questions or feedback, feel free to reach out to **[Your Name]** at **your.email@example.com**.
