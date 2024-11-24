@@ -16,7 +16,7 @@ Before running the application, ensure you have the following installed:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/Distributed-Drone-Delivery.git
+git clone https://gitlab.com/santeri-karppinen-sw-architectures-design-2024/Distributed-Drone-Delivery.git
 cd Distributed-Drone-Delivery
 ```
 
@@ -103,4 +103,4 @@ The application logs the received commands in the console where the Spring Boot 
 
 ## Contact
 
-For any questions or feedback, feel free to reach out to **[Your Name]** at **your.email@example.com**.
+For any questions or feedback, feel free to reach out to **[Santeri Karppinen]** at **santeri.karppinen@tuni.fi**.
