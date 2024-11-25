@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: fi.archi.springrest.DroneInventoryService.DroneInventoryServiceApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.930 s -- in fi.archi.springrest.DroneInventoryService.DroneInventoryServiceApplicationTests
