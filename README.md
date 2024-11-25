@@ -1,6 +1,6 @@
 # Distributed Drone Delivery System
-
-This project implements a distributed drone delivery system using RabbitMQ for message communication. The application simulates a drone that responds to commands such as `start-drone`, `land`, and `return-to-base`.
+- Earlier project where this is based on can be found here: https://github.com/Karppimc/Drone-Delivery-Service
+- This project implements a distributed drone delivery system using RabbitMQ for message communication. The application simulates a drone that responds to commands such as `start-drone`, `land`, and `return-to-base`.
 
 ## Prerequisites
 
