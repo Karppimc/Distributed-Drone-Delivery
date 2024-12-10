@@ -1,15 +1,21 @@
 # Distributed Drone Delivery System
 
-This project implements a distributed drone delivery system using RabbitMQ for message communication. The application simulates a drone that responds to commands such as `start-drone`, `land`, and `return-to-base`.
+This project implements a distributed drone delivery system using RabbitMQ and a service-based architecture. The system consists of three main components:
+1. **Device** - Simulates a drone responding to commands via RabbitMQ.
+2. **Inventory** - Manages the fleet of drones.
+3. **Delivery** - Manages delivery requests and assigns drones.
+
+---
 
 ## Prerequisites
 
-Before running the application, ensure you have the following installed:
+Ensure you have the following installed:
+- **Java Development Kit (JDK)**: Version 17 or above.
+- **Maven**: For building and running the Spring Boot applications.
+- **RabbitMQ**: Installed and running locally with the Management Plugin enabled.
+- **CURL**: For sending test commands to RabbitMQ and services.
 
-1. **Java Development Kit (JDK)**: Version 17 or above.
-2. **Maven**: For building and running the Spring Boot application.
-3. **RabbitMQ**: Installed and running locally. Ensure the RabbitMQ Management Plugin is enabled.
-4. **CURL**: For sending test commands to RabbitMQ.
+---
 
 ## Setup Instructions
 
@@ -20,87 +26,133 @@ git clone https://gitlab.com/santeri-karppinen-sw-architectures-design-2024/Dist
 cd Distributed-Drone-Delivery
 ```
 
-### 2. Install RabbitMQ
+---
 
-- Download and install RabbitMQ from [https://www.rabbitmq.com/download.html](https://www.rabbitmq.com/download.html).
-- Start RabbitMQ:
-  ```bash
-  rabbitmq-server
-  ```
-- Verify RabbitMQ is running:
-  ```bash
-  rabbitmqctl status
-  ```
+### 2. Start RabbitMQ Server
 
-### 3. Configure RabbitMQ
+1. Install RabbitMQ from [https://www.rabbitmq.com/download.html](https://www.rabbitmq.com/download.html).
+2. Start RabbitMQ:
+   ```bash
+   rabbitmq-server
+   ```
+3. Verify RabbitMQ is running:
+   ```bash
+   rabbitmqctl status
+   ```
+
+---
+
+### 3. Configure RabbitMQ Queue
 
 Ensure the `flight-commands` queue exists:
-
-1. Access the RabbitMQ Management Interface:
-   - Open a browser and navigate to `http://localhost:15672`.
+1. Access the RabbitMQ Management Interface (`http://localhost:15672`).
    - Log in with the default credentials: `guest` / `guest`.
-2. Create a queue:
-   - Go to the **Queues** tab.
-   - Click **Add a new queue** and enter `flight-commands` as the name.
-   - Leave other fields as default and click **Add queue**.
+2. Create the `flight-commands` queue:
+   - Go to **Queues** and add a new queue named `flight-commands`.
 
-### 4. Build and Run the Application
- - USE OWN TERMINAL FOR INVENTORY DELIVERY AND DEVICE
-1. Navigate to the project directory:
-   ```bash
-   cd Device or cd Delivery or cd Intentory
-   ```
-2. Build and run the application:
-   ```bash
-   mvn spring-boot:run
-   ```
+---
 
-The application will start and listen for messages from the `flight-commands` queue.
+### 4. Run Applications
 
-### 5. Test the Application
+Each application must be run in its own terminal window using Maven:
 
-You can send commands to the `flight-commands` queue using the RabbitMQ HTTP API and `cURL`:
+#### Start Drone Simulator (Device)
+```bash
+cd Device
+mvn spring-boot:run
+```
 
-#### Send a Command
+#### Start DroneInventoryService
+```bash
+cd Inventory
+mvn spring-boot:run
+```
 
+#### Start DeliveryService
+```bash
+cd Delivery
+mvn spring-boot:run
+```
+
+---
+
+## Testing the Applications
+
+### 1. Testing Drone Simulator (RabbitMQ Integration)
+
+Send commands to the `flight-commands` queue using RabbitMQ HTTP API:
+
+#### Start Drone
 ```bash
 curl -i -u guest:guest -H "content-type:application/json" -X POST \
 -d '{"properties":{}, "routing_key":"flight-commands", "payload":"{\"command\":\"start-drone\"}", "payload_encoding":"string"}' \
 http://localhost:15672/api/exchanges/%2F/amq.default/publish
 ```
 
-Replace `start-drone` with `land` or `return-to-base` to test other commands.
-
-#### Expected Output
-
-In the application logs, you should see:
-
-```plaintext
-Received command: {"command":"start-drone"}
+#### Land Drone
+```bash
+curl -i -u guest:guest -H "content-type:application/json" -X POST \
+-d '{"properties":{}, "routing_key":"flight-commands", "payload":"{\"command\":\"land\"}", "payload_encoding":"string"}' \
+http://localhost:15672/api/exchanges/%2F/amq.default/publish
 ```
 
-For the `land` and `return-to-base` commands, the output will reflect the respective commands.
+#### Return Drone to Base
+```bash
+curl -i -u guest:guest -H "content-type:application/json" -X POST \
+-d '{"properties":{}, "routing_key":"flight-commands", "payload":"{\"command\":\"return-to-base\"}", "payload_encoding":"string"}' \
+http://localhost:15672/api/exchanges/%2F/amq.default/publish
+```
 
-## Viewing Results
+---
 
-The application logs the received commands in the console where the Spring Boot application is running.
+### 2. Testing DroneInventoryService (Port 8081)
 
-## Troubleshooting
+#### Add a Drone
+```bash
+curl -d '{"id":"123", "name":"Tom-v1", "capacity":300}' -H "Content-Type: application/json" -X POST http://localhost:8081/dronora/drones
+```
 
-### Common Issues
+#### Get All Drones
+```bash
+curl http://localhost:8081/dronora/drones
+```
 
-1. **RabbitMQ Queue Not Found**:
-   - Ensure the `flight-commands` queue is created in RabbitMQ.
+#### Get a Specific Drone by ID
+```bash
+curl http://localhost:8081/dronora/drones/123
+```
 
-2. **Connection Issues**:
-   - Ensure RabbitMQ is running and accessible at `localhost:5672`.
-   - Verify RabbitMQ credentials (`guest:guest`) are correct.
+#### Delete a Drone
+```bash
+curl -X DELETE http://localhost:8081/dronora/drones/123
+```
 
-3. **Command Not Received**:
-   - Check if the queue has the correct name (`flight-commands`).
-   - Confirm the application is running and listening.
+---
 
+### 3. Testing DeliveryService (Port 8082)
 
-## Contact
+#### Create a Delivery
+```bash
+curl -d '{"id":"D001", "pickupLocation":"Location A", "dropoffLocation":"Location B", "droneId":"123"}' -H "Content-Type: application/json" -X POST http://localhost:8082/dronora/deliveries
+```
 
-For any questions or feedback, feel free to reach out to **[Santeri Karppinen]** at **santeri.karppinen@tuni.fi**.
+#### Get All Deliveries
+```bash
+curl http://localhost:8082/dronora/deliveries
+```
+
+#### Get a Specific Delivery by ID
+```bash
+curl http://localhost:8082/dronora/deliveries/D001
+```
+
+#### Delete a Delivery
+```bash
+curl -X DELETE http://localhost:8082/dronora/deliveries/D001
+```
+
+---
+
+## Summary
+
+This project combines RabbitMQ-based messaging with a service-based architecture to implement a complete distributed drone delivery system. Each component runs independently, allowing for scalable and modular operations.
